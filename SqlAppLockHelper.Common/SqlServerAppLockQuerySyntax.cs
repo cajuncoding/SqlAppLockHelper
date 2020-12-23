@@ -17,8 +17,8 @@ namespace SqlAppLockHelper
 
     public class SqlServerStoredProcNames
     {
-        public const string AcquireLock = "sp_getapplock ";
-        public const string ReleaseLock = "sp_releaseapplock";
+        public const string AcquireLock = "dbo.sp_getapplock ";
+        public const string ReleaseLock = "dbo.sp_releaseapplock";
     }
 
     public class SqlServerStoredParamNames
