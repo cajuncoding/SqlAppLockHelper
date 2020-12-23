@@ -20,8 +20,9 @@ namespace SqlAppLockHelper.Tests
             //Acquire the Lock & Validate
             await using var appLock = await sqlTrans.AcquireAppLockAsync(
                 nameof(TestSystemDataTransactionAppLock), 
-                3, 
-                false
+                acquisitionTimeoutSeconds: 1,
+                throwsException: false,
+                sqlCommandTimeout: 20
             );
 
             Assert.IsNotNull(appLock);
@@ -35,8 +36,8 @@ namespace SqlAppLockHelper.Tests
             await using var sqlTransWhileLocked = (SqlTransaction)await sqlConnWhileLocked.BeginTransactionAsync();
             await using var appLockFailWhileLocked = await sqlTransWhileLocked.AcquireAppLockAsync(
                 nameof(TestSystemDataTransactionAppLock), 
-                1,
-                false
+                acquisitionTimeoutSeconds: 3,
+                throwsException: false
             );
             
             Assert.IsNotNull(appLockFailWhileLocked);
@@ -53,9 +54,9 @@ namespace SqlAppLockHelper.Tests
 
             var sqlTransAfterRelease = (SqlTransaction)await sqlConnAfterRelease.BeginTransactionAsync();
             await using var appLockAfterRelease = await sqlTransAfterRelease.AcquireAppLockAsync(
-                nameof(TestSystemDataTransactionAppLock), 
-                3,
-                false
+                nameof(TestSystemDataTransactionAppLock),
+                acquisitionTimeoutSeconds: 3,
+                throwsException: false
             );
 
             Assert.IsNotNull(appLockAfterRelease);
@@ -72,10 +73,7 @@ namespace SqlAppLockHelper.Tests
             await using var sqlTrans = (SqlTransaction)await sqlConn.BeginTransactionAsync();
 
             //Acquire the Lock & Validate
-            await using var appLock = await sqlTrans.AcquireAppLockAsync(
-                nameof(TestSystemDataTransactionAppLock),
-                3
-            );
+            await using var appLock = await sqlTrans.AcquireAppLockAsync(nameof(TestSystemDataTransactionAppLock));
 
             Assert.IsNotNull(appLock);
             Assert.AreEqual(appLock.LockAcquisitionResult, SqlServerAppLockAcquisitionResult.AcquiredImmediately);
@@ -89,8 +87,8 @@ namespace SqlAppLockHelper.Tests
 
                 await using var sqlTransWhileLocked = (SqlTransaction)await sqlConnWhileLocked.BeginTransactionAsync();
                 await using var appLockFailWhileLocked = await sqlTransWhileLocked.AcquireAppLockAsync(
-                    nameof(TestSystemDataTransactionAppLock), 
-                    1
+                    nameof(TestSystemDataTransactionAppLock),
+                    acquisitionTimeoutSeconds: 1
                 );
 
                 //SHOULD NOT REACH THIS CODE DUE TO EXCEPTION!
@@ -125,8 +123,7 @@ namespace SqlAppLockHelper.Tests
             using var sqlTransWhileLocked = (SqlTransaction)sqlConnWhileLocked.BeginTransaction();
             using var appLockFailWhileLocked = sqlTransWhileLocked.AcquireAppLock(
                 nameof(TestSystemDataTransactionAppLock),
-                1,
-                false
+                throwsException: false
             );
 
             Assert.IsNotNull(appLockFailWhileLocked);
@@ -144,8 +141,8 @@ namespace SqlAppLockHelper.Tests
             var sqlTransAfterRelease = (SqlTransaction)sqlConnAfterRelease.BeginTransaction();
             using var appLockAfterRelease = sqlTransAfterRelease.AcquireAppLock(
                 nameof(TestSystemDataTransactionAppLock),
-                3,
-                false
+                acquisitionTimeoutSeconds: 3,
+                throwsException: false
             );
 
             Assert.IsNotNull(appLockAfterRelease);
@@ -154,7 +151,7 @@ namespace SqlAppLockHelper.Tests
         }
 
         [TestMethod]
-        public void TestSsyncTransactionAppLockAcquisitionWithExceptions()
+        public void TestSyncTransactionAppLockAcquisitionWithExceptions()
         {
             using var sqlConn = TestHelper.CreateSystemDataSqlConnection();
             sqlConn.Open();
@@ -162,10 +159,7 @@ namespace SqlAppLockHelper.Tests
             using var sqlTrans = (SqlTransaction)sqlConn.BeginTransaction();
 
             //Acquire the Lock & Validate
-            using var appLock = sqlTrans.AcquireAppLock(
-                nameof(TestSystemDataTransactionAppLock),
-                3
-            );
+            using var appLock = sqlTrans.AcquireAppLock(nameof(TestSystemDataTransactionAppLock));
 
             Assert.IsNotNull(appLock);
             Assert.AreEqual(appLock.LockAcquisitionResult, SqlServerAppLockAcquisitionResult.AcquiredImmediately);
@@ -178,10 +172,7 @@ namespace SqlAppLockHelper.Tests
                 sqlConnWhileLocked.Open();
 
                 using var sqlTransWhileLocked = (SqlTransaction)sqlConnWhileLocked.BeginTransaction();
-                using var appLockFailWhileLocked = sqlTransWhileLocked.AcquireAppLock(
-                    nameof(TestSystemDataTransactionAppLock),
-                    1
-                );
+                using var appLockFailWhileLocked = sqlTransWhileLocked.AcquireAppLock(nameof(TestSystemDataTransactionAppLock));
 
                 //SHOULD NOT REACH THIS CODE DUE TO EXCEPTION!
                 Assert.IsNull(appLockFailWhileLocked);

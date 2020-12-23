@@ -21,6 +21,9 @@ There are two scopes for Locks that are supported:
 #### Usage Notes: 
  - The generally recommended approach is to use the *Transaction* scope because it is slightly safer (e.g. more resilient agains
 abandoned locks).
+- The LockTimeout value is the value for which Sql Server will try and wait for Lock Acquisition. By specifying Zero
+(0 seconds) then Sql Server will attempt to get the lock but immediately fail lock acquisition and return if it cannot
+acquire the lock.
  - More info can be found here: 
    - [sp_getapplock](https://docs.microsoft.com/en-us/sql/relational-databases/system-stored-procedures/sp-getapplock-transact-sql?view=sql-server-ver15)
    - [sp_releaseapplock](https://docs.microsoft.com/en-us/sql/relational-databases/system-stored-procedures/sp-releaseapplock-transact-sql?view=sql-server-ver15) 

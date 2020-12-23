@@ -12,7 +12,9 @@ namespace SqlAppLockHelper.MicrosoftDataNS
             string lockName, 
             SqlServerAppLockScope lockScope,
             int acquisitionTimeoutSeconds,
-            SqlTransaction sqlTransaction = null)
+            int? sqlCommandTimeout = null,
+            SqlTransaction sqlTransaction = null
+        )
         {
             var sqlConn = sqlConnection ?? throw new ArgumentException(
               "The SqlConnection provided cannot be null.",
@@ -41,6 +43,11 @@ namespace SqlAppLockHelper.MicrosoftDataNS
                 CommandType = CommandType.StoredProcedure,
                 Transaction = sqlTransaction
             };
+
+            if (sqlCommandTimeout.HasValue)
+            {
+                sqlCmd.CommandTimeout = sqlCommandTimeout.Value;
+            }
 
             sqlCmd.Parameters.AddRange(new[]
             {

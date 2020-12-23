@@ -19,10 +19,10 @@ namespace SqlAppLockHelper
             if (string.IsNullOrWhiteSpace(lockName))
                 throw new ArgumentNullException(nameof(lockName));
 
-            if (lockAcquisitionTimeoutSeconds < 1)
+            if (lockAcquisitionTimeoutSeconds < 0)
                 throw new ArgumentOutOfRangeException(
                     nameof(lockAcquisitionTimeoutSeconds), 
-                    "The Lock Acquisition timeout must be greater than or equal to 1 second."
+                    "The Lock Acquisition timeout must be greater than or equal to 0."
                 );
         }
         

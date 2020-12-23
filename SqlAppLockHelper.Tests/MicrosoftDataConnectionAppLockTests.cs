@@ -17,9 +17,9 @@ namespace SqlAppLockHelper.Tests
 
             //Acquire the Lock & Validate
             await using var appLock = await sqlConn.AcquireAppLockAsync(
-                nameof(TestSystemDataAppLock), 
-                3, 
-                false
+                nameof(TestSystemDataAppLock),
+                acquisitionTimeoutSeconds: 1,
+                throwsException: false
             );
 
             Assert.IsNotNull(appLock);
@@ -32,8 +32,8 @@ namespace SqlAppLockHelper.Tests
 
             await using var appLockFailWhileLocked = await sqlConnWhileLocked.AcquireAppLockAsync(
                 nameof(TestSystemDataAppLock),
-                1,
-                false
+                acquisitionTimeoutSeconds: 3,
+                throwsException: false
             );
 
             Assert.IsNotNull(appLockFailWhileLocked);
@@ -49,9 +49,8 @@ namespace SqlAppLockHelper.Tests
             await sqlConnAfterRelease.OpenAsync();
 
             await using var appLockAfterRelease = await sqlConnAfterRelease.AcquireAppLockAsync(
-                nameof(TestSystemDataAppLock), 
-                3,
-                false
+                nameof(TestSystemDataAppLock),
+                throwsException: false
             );
 
             Assert.IsNotNull(appLockAfterRelease);
@@ -66,10 +65,7 @@ namespace SqlAppLockHelper.Tests
             await sqlConn.OpenAsync();
 
             //Acquire the Lock & Validate
-            await using var appLock = await sqlConn.AcquireAppLockAsync(
-                nameof(TestSystemDataAppLock),
-                3
-            );
+            await using var appLock = await sqlConn.AcquireAppLockAsync(nameof(TestSystemDataAppLock));
 
             Assert.IsNotNull(appLock);
             Assert.AreEqual(appLock.LockAcquisitionResult, SqlServerAppLockAcquisitionResult.AcquiredImmediately);
@@ -82,8 +78,8 @@ namespace SqlAppLockHelper.Tests
                 await sqlConnWhileLocked.OpenAsync();
 
                 await using var appLockFailWhileLocked = await sqlConnWhileLocked.AcquireAppLockAsync(
-                    nameof(TestSystemDataAppLock), 
-                    1
+                    nameof(TestSystemDataAppLock),
+                    acquisitionTimeoutSeconds: 1
                 );
 
                 //SHOULD NOT REACH THIS CODE DUE TO EXCEPTION!
@@ -103,16 +99,12 @@ namespace SqlAppLockHelper.Tests
             await sqlConn.OpenAsync();
 
             //Acquire the Lock & Validate
-            await using var appLock = await sqlConn.AcquireAppLockAsync(
-                nameof(TestSystemDataAppLock),
-                3
-            );
+            await using var appLock = await sqlConn.AcquireAppLockAsync(nameof(TestSystemDataAppLock));
 
             Assert.IsNotNull(appLock);
             Assert.AreEqual(appLock.LockAcquisitionResult, SqlServerAppLockAcquisitionResult.AcquiredImmediately);
             Assert.IsFalse(string.IsNullOrWhiteSpace(appLock.LockName));
 
- 
             //Explicitly Release the AppLock & Validate
             await appLock.DisposeAsync();
 

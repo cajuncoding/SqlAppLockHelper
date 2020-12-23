@@ -9,8 +9,9 @@ namespace SqlAppLockHelper.SystemDataNS
         public static SqlServerAppLock AcquireAppLock(
             this SqlTransaction sqlTransaction, 
             string lockName, 
-            int acquisitionTimeoutSeconds, 
-            bool throwsException = true
+            int acquisitionTimeoutSeconds = 0,
+            bool throwsException = true,
+            int? sqlCommandTimeout = null
         )
         {
             var sqlTrans = sqlTransaction ?? throw new ArgumentNullException(nameof(sqlTransaction));
@@ -21,15 +22,23 @@ namespace SqlAppLockHelper.SystemDataNS
             );
 
             //Acquire the Lock using this Transaction as Scope!
-            var resultAppLock = sqlConn.AcquireAppLock(lockName, acquisitionTimeoutSeconds, throwsException, sqlTransaction);
+            var resultAppLock = sqlConn.AcquireAppLock(
+                lockName, 
+                acquisitionTimeoutSeconds, 
+                throwsException, 
+                sqlCommandTimeout, 
+                sqlTransaction
+            );
+
             return resultAppLock;
         }
 
         public static async Task<SqlServerAppLock> AcquireAppLockAsync(
             this SqlTransaction sqlTransaction, 
             string lockName, 
-            int acquisitionTimeoutSeconds, 
-            bool throwsException = true
+            int acquisitionTimeoutSeconds = 0, 
+            bool throwsException = true,
+            int? sqlCommandTimeout = null
         )
         {
             var sqlTrans = sqlTransaction ?? throw new ArgumentNullException(nameof(sqlTransaction));
@@ -40,16 +49,23 @@ namespace SqlAppLockHelper.SystemDataNS
             );
 
             //Acquire the Lock using this Transaction as Scope!
-            var resultAppLock = await sqlConn.AcquireAppLockAsync(lockName, acquisitionTimeoutSeconds, throwsException, sqlTransaction);
-            return resultAppLock;
+            var resultAppLock = await sqlConn.AcquireAppLockAsync(
+                lockName, 
+                acquisitionTimeoutSeconds, 
+                throwsException, 
+                sqlCommandTimeout,
+                sqlTransaction
+            );
 
+            return resultAppLock;
         }
 
         public static SqlServerAppLock AcquireAppLock(
             this SqlConnection sqlConnection, 
             string lockName, 
-            int acquisitionTimeoutSeconds,
+            int acquisitionTimeoutSeconds = 0,
             bool throwsException = true,
+            int? sqlCommandTimeout = null,
             SqlTransaction sqlTransaction = null
         )
         {
@@ -65,6 +81,7 @@ namespace SqlAppLockHelper.SystemDataNS
                 lockName,
                 lockScope,
                 acquisitionTimeoutSeconds,
+                sqlCommandTimeout,
                 sqlTransaction
             );
 
@@ -91,8 +108,9 @@ namespace SqlAppLockHelper.SystemDataNS
         public static async Task<SqlServerAppLock> AcquireAppLockAsync(
             this SqlConnection sqlConnection, 
             string lockName,
-            int acquisitionTimeoutSeconds, 
+            int acquisitionTimeoutSeconds = 0, 
             bool throwsException = true,
+            int? sqlCommandTimeout = null,
             SqlTransaction sqlTransaction = null
         )
         {
@@ -107,7 +125,8 @@ namespace SqlAppLockHelper.SystemDataNS
                 sqlConn, 
                 lockName,
                 lockScope,
-                acquisitionTimeoutSeconds, 
+                acquisitionTimeoutSeconds,
+                sqlCommandTimeout,
                 sqlTransaction
             );
             

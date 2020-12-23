@@ -2,6 +2,17 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
+    <PackageId>SqlAppLockHelper.MicrosoftData</PackageId>
+    <Authors>BBernard / CajunCoding</Authors>
+    <Company>CajunCoding</Company>
+    <Product>SqlAppLockHelper</Product>
+    <Description>An ultra lightweight API for robust Distributed Application Locking capabilities leveraging Sql Server.  The API provides a set of easy to use custom extensions for the System.Data.SqlClient library that provide robust distributed applicaiton locking support via the sp_getapplock &amp; sp_releaseapplock stored procedures.</Description>
+    <Copyright>Copyright © 2020</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/cajuncoding/SqlAppLockHelper</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/cajuncoding/SqlAppLockHelper</RepositoryUrl>
+    <PackageTags>sp_getapplock, sp_releaseapplock, distributed-locking, distributed-lock-algorithm, app-locking, application-locking, sql, sqlserver, sql-server, sqlclient, locking, application-lock, application-lock-system, transactional-outbox-pattern, azurefunctions, azure-functions, serverless</PackageTags>
+    <PackageReleaseNotes>Initial release of Async/Sync support for System.Data &amp; Microsoft.Data namespace.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
