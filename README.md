@@ -62,8 +62,9 @@ Usage is very simple by using custom extensions of the SqlConnection or SqlTrans
 
     //Using any SqlTransaction (cast DbTransaction to SqlTransaction if needed), this will attempt to acquire
     //  a distributed lock, and will wait up to 5 seconds before timing out.
-    //Note: Default behavior is to throw and exception if the Lock cannot be acquired (e.g. is alredy held by another process)
-    //      but this can be overridden by parameter to return the state in the appLock result.
+    //Note: Default behavior is to throw and exception if the Lock cannot be acquired
+	//		(e.g. is already held by another process) but this can be overridden by parameter 
+	//		to return the state in the appLock result.
     await using var appLock = await sqlTrans.AcquireAppLockAsync("MyAppBulkLoadingDistributedLock", 5);
 
     if(appLock.IsAcquired)
@@ -80,8 +81,9 @@ _*NOTE: *Application Lock should ALWAYS be explicity Disposed of to ensure Lock 
 
     //Using any SqlTransaction (cast DbTransaction to SqlTransaction if needed), this will attempt to acquire
     //  a distributed lock, and will wait up to 5 seconds before timing out.
-    //Note: Default behavior is to throw and exception if the Lock cannot be acquired (e.g. is alredy held by another process)
-    //      but this can be overridden by parameter to return the state in the appLock result.
+    //Note: Default behavior is to throw and exception if the Lock cannot be acquired 
+	//		(e.g. is already held by another process) but this can be overridden by parameter 
+	//		to return the state in the appLock result.
     //Note: The IDisposable/IAsyncDisposable implementation ensures that the Lock is released!
     await using var appLock = await sqlConn.AcquireAppLockAsync("MyAppBulkLoadingDistributedLock", 5);
 
@@ -99,7 +101,7 @@ _**NOTE: More Sample code is provided in the Tests Project (as Integration Tests
   
 MIT License
 
-Copyright (c) 2019 - Brandon Bernard
+Copyright (c) 2020 - Brandon Bernard
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
