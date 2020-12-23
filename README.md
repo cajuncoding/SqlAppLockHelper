@@ -15,8 +15,8 @@ The usage for both is identical, with only the import being different based on t
 
 #### Locking Scopes (maps to the `@LockOwner` parameter of `sp_getapplock`):
 There are two scopes for Locks that are supported:
- - Session Scope (which requires expclit release; implimented as IDisposable)
- - Transaction Scope (which can be released, but will automatically be done when Transaction is Commited/Rolled-back/Closed).
+ - Session Scope (requires expclit release; implemented as IDisposable/IAsyncDisposable to provide reliable release via C# `using` pattern)
+ - Transaction Scope (can be optionally released, but will automatically be released by SqlServer when Transaction is Commited/Rolled-back/Closed).
 
 #### Usage Notes: 
  - The generally recommended approach is to use the *Transaction* scope because it is slightly safer (e.g. more resilient agains
