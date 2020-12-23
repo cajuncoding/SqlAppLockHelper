@@ -1,8 +1,8 @@
-﻿# SqlAppLockHelper
-A very lightweight library that provides and easy to use API for the Sql Server Application Lock Stored Procs
-(e.g. sp_getapplock & sp_releaseapplock). These stored procs provide a robust & efficient distributed locking
-capability using Sql Server. And this library exposes this in an easy to use API using custom extension methods
-on the SqlConnection and SqlTransaction classes of the existing SqlClient.
+﻿# SqlAppLockHelper -- Easy Distributed Mutex/Locking with Sql Server
+An ultra lightweight library that provides and easy to use API for a robust distributed mutex locking capability that leverages 
+Sql Server (e.g. sp_getapplock & sp_releaseapplock). Sql Server provides a very robust & efficient distributed mutex/locking
+capability and this library exposes this in an easy to use C# .Net Standard API using custom extension methods
+on the SqlConnection and SqlTransaction classes of the SqlClient libraries.
 
 #### SqlClient Namespaces:
 There are two namespaces for SqlClient, and this library supports both:
@@ -20,10 +20,13 @@ There are two scopes for Locks that are supported:
 
 #### Usage Notes: 
  - The generally recommended approach is to use the *Transaction* scope because it is slightly safer (e.g. more resilient agains
-abandoned locks).
-- The LockTimeout value is the value for which Sql Server will try and wait for Lock Acquisition. By specifying Zero
+abandoned locks) by allowing the Locks to automatically expire with the Transaction; and is the default behavior of Sql Server.
+    - However the *Session* scope is reliably implemented via IDisposable/IAsyncDisposable C# interfaces leaving 
+the main residual risk of Database communication or Network issues, whereby if we can't communicate with the DB then we can't explicity release the lock.
+ - The lock _acquisition timeout_ value is the value (in seconds) for which Sql Server will try and wait for Lock Acquisition. By specifying Zero
 (0 seconds) then Sql Server will attempt to get the lock but immediately fail lock acquisition and return if it cannot
 acquire the lock.
+ - All locks are acquired as Exclusive locks for true _distributed mutex_ functionality.
  - More info can be found here: 
    - [sp_getapplock](https://docs.microsoft.com/en-us/sql/relational-databases/system-stored-procedures/sp-getapplock-transact-sql?view=sql-server-ver15)
    - [sp_releaseapplock](https://docs.microsoft.com/en-us/sql/relational-databases/system-stored-procedures/sp-releaseapplock-transact-sql?view=sql-server-ver15) 
@@ -37,11 +40,13 @@ Queue Processing logic, Transactional Outbox Pattern, etc.).
 
 
 ## Nuget Package
-To use in your project, add the [SqlAppLockHelper NuGet package](https://www.nuget.org/packages/SqlAppLockHelper/) to your project.
+To use in your project, add the appropriate package to your project for the namespace you are using:
+-  [SqlAppLockHelper.MicrosoftData NuGet package](https://www.nuget.org/packages/SqlAppLockHelper.MicrosoftData/)
+-  [SqlAppLockHelper.SystemData NuGet package](https://www.nuget.org/packages/SqlAppLockHelper.SystemData/)
 
 ## Usage:
 
-### Import the Custom Extensions:
+#### Import the Custom Extensions:
 First import the extensions for the library you are using:
 ```csharp
 using Microsoft.Data.SqlClient;
@@ -54,7 +59,10 @@ using SqlAppLockHelper.SystemDataNS;
 ```
 
 ### Simple Example:
-Usage is very simple by using custom extensions of the SqlConnection or SqlTransaction.
+Usage is very simple by using custom extensions of the SqlConnection or SqlTransaction. The following example shows
+the recommended usage of Transaction Scope by calling `.AcquireAppLockAsync(...)` on the SqlTransaction instance:
+
+*NOTE:* Async is recommended, but the sync implementation works exactly the same -- sans async/await.
 
 #### Using Sql Transaction (Transaction Scope will be used):
 ```csharp
@@ -64,10 +72,10 @@ Usage is very simple by using custom extensions of the SqlConnection or SqlTrans
     await using var sqlTrans = (SqlTransaction)await sqlConn.BeginTransactionAsync();
 
     //Using any SqlTransaction (cast DbTransaction to SqlTransaction if needed), this will 
-	//	attempt to acquire a distributed lock, and will wait up to 5 seconds before timing out.
+    //	attempt to acquire a distributed mutex/lock, and will wait up to 5 seconds before timing out.
     //Note: Default behavior is to throw and exception if the Lock cannot be acquired
-	//		(e.g. is already held by another process) but this can be overridden by parameter 
-	//		to return the state in the appLock result.
+    //		(e.g. is already held by another process) but this can be overridden by parameter 
+    //		to return the state in the appLock result.
     await using var appLock = await sqlTrans.AcquireAppLockAsync("MyAppBulkLoadingDistributedLock", 5);
 
     if(appLock.IsAcquired)
@@ -83,10 +91,10 @@ _*NOTE: *Application Lock should ALWAYS be explicity Disposed of to ensure Lock 
     await sqlConn.OpenAsync();
 
     //Using any SqlTransaction (cast DbTransaction to SqlTransaction if needed), this will 
-	//	attempt to acquire a distributed lock, and will wait up to 5 seconds before timing out.
+    //	attempt to acquire a distributed mutex/lock, and will wait up to 5 seconds before timing out.
     //Note: Default behavior is to throw and exception if the Lock cannot be acquired 
-	//		(e.g. is already held by another process) but this can be overridden by parameter 
-	//		to return the state in the appLock result.
+    //		(e.g. is already held by another process) but this can be overridden by parameter 
+    //		to return the state in the appLock result.
     //Note: The IDisposable/IAsyncDisposable implementation ensures that the Lock is released!
     await using var appLock = await sqlConn.AcquireAppLockAsync("MyAppBulkLoadingDistributedLock", 5);
 
