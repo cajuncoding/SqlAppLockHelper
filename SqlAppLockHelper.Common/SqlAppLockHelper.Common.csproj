@@ -2,6 +2,17 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
+    <PackageId>SqlAppLockHelper.Common</PackageId>
+    <Authors>BBernard / CajunCoding</Authors>
+    <Company>CajunCoding</Company>
+    <Product>SqlAppLockHelper</Product>
+    <Description>The Common libraries for SqlAppLockHelper; You should install SqlAppLockHelper.SystemData or SqlAppLockHelper.MicrosoftData depending on which SqlClient liberaries are in use in your project.</Description>
+    <Copyright>Copyright © 2020</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/cajuncoding/SqlAppLockHelper</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/cajuncoding/SqlAppLockHelper</RepositoryUrl>
+    <PackageTags>sp_getapplock, sp_releaseapplock, distributed-locking, distributed-lock-algorithm, app-locking, application-locking, sql, sqlserver, sql-server, sqlclient, locking, application-lock, application-lock-system, transactional-outbox-pattern, azurefunctions, azure-functions, serverless</PackageTags>
+    <PackageReleaseNotes>Initial release of Async/Sync support for System.Data &amp; Microsoft.Data namespace.</PackageReleaseNotes>
   </PropertyGroup>
 
 </Project>

@@ -13,7 +13,6 @@
     <RepositoryUrl>https://github.com/cajuncoding/SqlAppLockHelper</RepositoryUrl>
     <PackageTags>sp_getapplock, sp_releaseapplock, distributed-locking, distributed-lock-algorithm, app-locking, application-locking, sql, sqlserver, sql-server, sqlclient, locking, application-lock, application-lock-system, transactional-outbox-pattern, azurefunctions, azure-functions, serverless</PackageTags>
     <PackageReleaseNotes>Initial release of Async/Sync support for System.Data &amp; Microsoft.Data namespace.</PackageReleaseNotes>
-
   </PropertyGroup>
 
   <ItemGroup>
