@@ -60,8 +60,8 @@ Usage is very simple by using custom extensions of the SqlConnection or SqlTrans
 
     await using var sqlTrans = (SqlTransaction)await sqlConn.BeginTransactionAsync();
 
-    //Using any SqlTransaction (cast DbTransaction to SqlTransaction if needed), this will attempt to acquire
-    //  a distributed lock, and will wait up to 5 seconds before timing out.
+    //Using any SqlTransaction (cast DbTransaction to SqlTransaction if needed), this will 
+	//	attempt to acquire a distributed lock, and will wait up to 5 seconds before timing out.
     //Note: Default behavior is to throw and exception if the Lock cannot be acquired
 	//		(e.g. is already held by another process) but this can be overridden by parameter 
 	//		to return the state in the appLock result.
@@ -79,8 +79,8 @@ _*NOTE: *Application Lock should ALWAYS be explicity Disposed of to ensure Lock 
     await using var sqlConn = new SqlConnection(sqlConnectionString);
     await sqlConn.OpenAsync();
 
-    //Using any SqlTransaction (cast DbTransaction to SqlTransaction if needed), this will attempt to acquire
-    //  a distributed lock, and will wait up to 5 seconds before timing out.
+    //Using any SqlTransaction (cast DbTransaction to SqlTransaction if needed), this will 
+	//	attempt to acquire a distributed lock, and will wait up to 5 seconds before timing out.
     //Note: Default behavior is to throw and exception if the Lock cannot be acquired 
 	//		(e.g. is already held by another process) but this can be overridden by parameter 
 	//		to return the state in the appLock result.
