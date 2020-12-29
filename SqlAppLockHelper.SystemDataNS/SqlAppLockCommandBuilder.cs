@@ -67,20 +67,27 @@ namespace SqlAppLockHelper.SystemDataNS
             SqlServerAppLockScope sqlAppLockScope
         )
         {
-            var sqlConn = sqlConnection ?? throw new ArgumentException(
-                $"The SqlConnection cannot be null; this is CRITICAL error during Dispose(), and may result in an" +
-                            $" abandoned {nameof(SqlServerAppLock)} on the server.",
-                nameof(sqlConnection)
-            );
+            //Short Circuit if the Connection is not valid and/or not open; as this means that Sql Server
+            //  has likely already released the lock so we just return null.
+            if (sqlConnection == null || sqlConnection.State != ConnectionState.Open) 
+                return null;
 
-            if (sqlConn.State != ConnectionState.Open)
-            {
-                throw new ArgumentException(
-                    $"The SqlConnection must be [Open]; current state is [{sqlConn.State}]. This is CRITICAL error during" +
-                                $" Dispose(), and may result in an abandoned {nameof(SqlServerAppLock)} on the server.",
-                    nameof(sqlConnection)
-                );
-            }
+            var sqlConn = sqlConnection;
+
+            //var sqlConn = sqlConnection ?? throw new ArgumentException(
+            //    $"The SqlConnection cannot be null; this is CRITICAL error during Dispose(), and may result in an" +
+            //                $" abandoned {nameof(SqlServerAppLock)} on the server.",
+            //    nameof(sqlConnection)
+            //);
+
+            //if (sqlConn.State != ConnectionState.Open)
+            //{
+            //    throw new ArgumentException(
+            //        $"The SqlConnection must be [Open]; current state is [{sqlConn.State}]. This is CRITICAL error during" +
+            //                    $" Dispose(), and may result in an abandoned {nameof(SqlServerAppLock)} on the server.",
+            //        nameof(sqlConnection)
+            //    );
+            //}
 
             var lockScope = SqlAppLockValidation.GetLockOwnerFromScope(sqlAppLockScope);
 
@@ -132,6 +139,10 @@ namespace SqlAppLockHelper.SystemDataNS
                 {
                     await using var sqlCmd = CreateReleaseLockSqlCommand(sqlConnection, lockName, sqlAppLockScope);
 
+                    //NOTE: Short Circuit if no Command was provided because this means that the Connection was null or already closed, and
+                    //  Sql Server has likely already released the lock... so we can continue.
+                    if (sqlCmd == null) return;
+
                     //Execute the Release process...
                     await sqlCmd.ExecuteNonQueryAsync();
 
@@ -163,6 +174,10 @@ namespace SqlAppLockHelper.SystemDataNS
                 try
                 {
                     using var sqlCmd = CreateReleaseLockSqlCommand(sqlConnection, lockName, sqlAppLockScope);
+
+                    //NOTE: Short Circuit if no Command was provided because this means that the Connection was null or already closed, and
+                    //  Sql Server has likely already released the lock... so we can continue.
+                    if (sqlCmd == null) return;
 
                     //Execute the Release process...
                     sqlCmd.ExecuteNonQuery();

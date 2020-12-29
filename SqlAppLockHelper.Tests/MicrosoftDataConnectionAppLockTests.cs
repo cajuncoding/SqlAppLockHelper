@@ -110,5 +110,109 @@ namespace SqlAppLockHelper.Tests
 
             Assert.IsTrue(appLock.IsDisposed);
         }
+
+        [TestMethod]
+        public async Task TestAsyncConnectionAppLockExplicitReleaseAsync()
+        {
+            await using var sqlConn = TestHelper.CreateMicrosoftDataSqlConnection();
+            await sqlConn.OpenAsync();
+
+            //Acquire the Lock & Validate
+            await using var appLock = await sqlConn.AcquireAppLockAsync(nameof(TestSystemDataAppLock));
+
+            Assert.IsNotNull(appLock);
+            Assert.AreEqual(appLock.LockAcquisitionResult, SqlServerAppLockAcquisitionResult.AcquiredImmediately);
+            Assert.IsFalse(string.IsNullOrWhiteSpace(appLock.LockName));
+
+            //Explicitly Release the AppLock & Validate
+            await appLock.ReleaseAsync();
+
+            await using var sqlConnAfterRelease = TestHelper.CreateMicrosoftDataSqlConnection();
+            await sqlConnAfterRelease.OpenAsync();
+
+            //Acquire the Lock & Validate
+            await using var appLockAfterRelease = await sqlConnAfterRelease.AcquireAppLockAsync(nameof(TestSystemDataAppLock));
+
+            Assert.IsNotNull(appLockAfterRelease);
+            Assert.AreEqual(appLockAfterRelease.LockAcquisitionResult, SqlServerAppLockAcquisitionResult.AcquiredImmediately);
+            Assert.IsFalse(string.IsNullOrWhiteSpace(appLockAfterRelease.LockName));
+        }
+
+        [TestMethod]
+        public void TestAsyncConnectionAppLockExplicitReleaseSync()
+        {
+            using var sqlConn = TestHelper.CreateMicrosoftDataSqlConnection();
+            sqlConn.Open();
+
+            //Acquire the Lock & Validate
+            using var appLock = sqlConn.AcquireAppLock(nameof(TestSystemDataAppLock));
+
+            Assert.IsNotNull(appLock);
+            Assert.AreEqual(appLock.LockAcquisitionResult, SqlServerAppLockAcquisitionResult.AcquiredImmediately);
+            Assert.IsFalse(string.IsNullOrWhiteSpace(appLock.LockName));
+
+            //Explicitly Release the AppLock & Validate
+            appLock.Release();
+
+            using var sqlConnAfterRelease = TestHelper.CreateMicrosoftDataSqlConnection();
+            sqlConnAfterRelease.Open();
+
+            //Acquire the Lock & Validate
+            using var appLockAfterRelease = sqlConnAfterRelease.AcquireAppLock(nameof(TestSystemDataAppLock));
+
+            Assert.IsNotNull(appLockAfterRelease);
+            Assert.AreEqual(appLockAfterRelease.LockAcquisitionResult, SqlServerAppLockAcquisitionResult.AcquiredImmediately);
+            Assert.IsFalse(string.IsNullOrWhiteSpace(appLockAfterRelease.LockName));
+        }
+
+        [TestMethod]
+        public async Task TestAsyncConnectionAppLockReleaseWithConnectionDisposalWithUsing()
+        {
+            await using (var sqlConn = TestHelper.CreateMicrosoftDataSqlConnection())
+            {
+                await sqlConn.OpenAsync();
+
+                //Acquire the Lock & Validate but DO NOT DISPOSE of it in the current Scope!
+                //await using var appLock = await sqlConn.AcquireAppLockAsync(
+                var appLock = await sqlConn.AcquireAppLockAsync(
+                    nameof(TestSystemDataAppLock),
+                    acquisitionTimeoutSeconds: 1,
+                    throwsException: false
+                );
+
+                Assert.IsNotNull(appLock);
+                Assert.AreEqual(appLock.LockAcquisitionResult, SqlServerAppLockAcquisitionResult.AcquiredImmediately);
+                Assert.IsFalse(string.IsNullOrWhiteSpace(appLock.LockName));
+
+                ////Attempt Acquisition from SECOND Connection Once Locked & Validate...
+                await using var sqlConnWhileLocked = TestHelper.CreateMicrosoftDataSqlConnection();
+                await sqlConnWhileLocked.OpenAsync();
+
+                await using var appLockFailWhileLocked = await sqlConnWhileLocked.AcquireAppLockAsync(
+                    nameof(TestSystemDataAppLock),
+                    acquisitionTimeoutSeconds: 1,
+                    throwsException: false
+                );
+
+                Assert.IsNotNull(appLockFailWhileLocked);
+                Assert.AreEqual(appLockFailWhileLocked.LockAcquisitionResult,
+                    SqlServerAppLockAcquisitionResult.FailedDueToTimeout);
+                Assert.IsFalse(string.IsNullOrWhiteSpace(appLockFailWhileLocked.LockName));
+            }
+
+            //Attempt Reacquisition of the Lock Once Released via Sql Connection Disposal (from using{} scope) above!
+            //Get a new Transaction to test re-acquisition!
+            await using var sqlConnAfterRelease = TestHelper.CreateMicrosoftDataSqlConnection();
+            await sqlConnAfterRelease.OpenAsync();
+
+            await using var appLockAfterRelease = await sqlConnAfterRelease.AcquireAppLockAsync(
+                nameof(TestSystemDataAppLock),
+                throwsException: false
+            );
+
+            Assert.IsNotNull(appLockAfterRelease);
+            Assert.AreEqual(appLockAfterRelease.LockAcquisitionResult, SqlServerAppLockAcquisitionResult.AcquiredImmediately);
+            Assert.IsFalse(string.IsNullOrWhiteSpace(appLockAfterRelease.LockName));
+        }
     }
 }
