@@ -40,6 +40,10 @@ namespace SqlAppLockHelper.Tests
             Assert.AreEqual(appLockFailWhileLocked.LockAcquisitionResult, SqlServerAppLockAcquisitionResult.FailedDueToTimeout);
             Assert.IsFalse(string.IsNullOrWhiteSpace(appLockFailWhileLocked.LockName));
 
+            //Check App Lock Elapsed Timers!
+            Assert.IsTrue(appLock.LockElapsedTime.TotalMilliseconds > 0);
+            Assert.IsTrue(appLockFailWhileLocked.LockElapsedTime.TotalMilliseconds == 0);
+
             //Force Release the Lock!
             await appLock.DisposeAsync();
 
@@ -56,6 +60,7 @@ namespace SqlAppLockHelper.Tests
             Assert.IsNotNull(appLockAfterRelease);
             Assert.AreEqual(appLockAfterRelease.LockAcquisitionResult, SqlServerAppLockAcquisitionResult.AcquiredImmediately);
             Assert.IsFalse(string.IsNullOrWhiteSpace(appLockAfterRelease.LockName));
+            Assert.IsTrue(appLockAfterRelease.LockElapsedTime.TotalMilliseconds > 0);
         }
 
         [TestMethod]

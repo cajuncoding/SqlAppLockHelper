@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -11,12 +12,15 @@ namespace SqlAppLockHelper
         //      namespaces, reducing duplication.
         private Func<ValueTask> _releaseActionAsync = null;
         private Action _releaseAction = null;
+        private Stopwatch _lockTimer = new Stopwatch();
 
         public string LockName { get; }
 
         public SqlServerAppLockScope LockScope { get; }
 
         public SqlServerAppLockAcquisitionResult LockAcquisitionResult { get; }
+
+        public TimeSpan LockElapsedTime => _lockTimer.Elapsed;
 
         public SqlServerAppLock(
             string lockName, 
@@ -31,6 +35,10 @@ namespace SqlAppLockHelper
             LockName = lockName;
             LockScope = scope;
             LockAcquisitionResult = lockAcquisitionResult;
+
+            //Start the Lock Timer ONLY if Lock was Acquired!
+            if(this.IsLockAcquired)
+                _lockTimer.Start();
 
             //Initialize Sync & Async callbacks for Disposal!
             //NOTE: Using Delegates here allows this class to be independent of Microsoft.Data/System.Data
@@ -56,6 +64,8 @@ namespace SqlAppLockHelper
             {
                 await _releaseActionAsync.Invoke();
                 _releaseActionAsync = null;
+
+                _lockTimer.Stop();
             }
         }
 
@@ -66,8 +76,12 @@ namespace SqlAppLockHelper
         /// </summary>
         public void Release()
         {
-            _releaseAction?.Invoke();
-            _releaseAction = null;
+            if (_releaseAction != null)
+            {
+                _releaseAction.Invoke();
+                _releaseAction = null;
+                _lockTimer.Stop();
+            }
         }
 
         /// <summary>
@@ -83,6 +97,7 @@ namespace SqlAppLockHelper
                 Release();
             }
 
+            _lockTimer.Stop();
             IsDisposed = true;
         }
 
@@ -99,6 +114,7 @@ namespace SqlAppLockHelper
                 await ReleaseAsync();
             }
 
+            _lockTimer.Stop();
             IsDisposed = true;
         }
     }
