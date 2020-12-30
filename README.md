@@ -101,8 +101,7 @@ the recommended usage of Transaction Scope by calling `.AcquireAppLockAsync(...)
     //	attempt to acquire a distributed mutex/lock, and will wait up to 5 seconds before timing out.
     //Note: Default behavior is to throw and exception but this is controlled via throwsException param
     //		and can then be managed via the returned the SqlServerAppLock result.
-    await using var appLock = await sqlTrans.AcquireAppLockAsync(
-        "MyAppBulkLoadingDistributedLock", 5, throwsException: false);
+    await using var appLock = await sqlTrans.AcquireAppLockAsync("MyAppBulkLoadingDistributedLock", 5, false);
 
     if(appLock.IsAcquired)
     {
@@ -121,8 +120,7 @@ _*NOTE: *Application Lock should ALWAYS be explicity Disposed of to ensure Lock 
     //Note: Default behavior is to throw and exception but this is controlled via throwsException param
     //		and can then be managed via the returned the SqlServerAppLock result.
     //Note: The IDisposable/IAsyncDisposable implementation ensures that the Lock is released!
-    await using var appLock = await sqlConn.AcquireAppLockAsync(
-        "MyAppBulkLoadingDistributedLock", 5throwsException: false);
+    await using var appLock = await sqlConn.AcquireAppLockAsync("MyAppBulkLoadingDistributedLock", 5, false);
 
     if(appLock.IsAcquired)
     {
