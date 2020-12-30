@@ -129,7 +129,7 @@ _*NOTE: *Application Lock should ALWAYS be explicity Disposed of to ensure Lock 
 
 ```
 
-_**NOTE: More Sample code is provided in the Tests Project (as Integration Tests)...**_
+_**NOTE: More Sample code is provided in the Tests Project...**_
 
 
 ```
