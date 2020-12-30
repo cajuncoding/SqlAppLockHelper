@@ -15,14 +15,15 @@ The usage for both is identical, with only the import being different based on t
 
 #### Locking Scopes (maps to the `@LockOwner` parameter of `sp_getapplock`):
 There are two scopes for Locks that are supported:
- - Session Scope (requires expclit release; implemented as IDisposable/IAsyncDisposable to provide reliable release via C# `using` pattern)
- - Transaction Scope (can be optionally released, but will automatically be released by SqlServer when Transaction is Commited/Rolled-back/Closed).
+ - Session Scope (will automatically be released by Sql Server when the Sql Connection is disposed/closed; or may be optionally explicitly released).
+ - Transaction Scope (Will automatically be released by Sql Server when Sql Transaction is Commited/Rolled-back/Closed; or can be optionally explicitly released).
+ 
+ Note: Explicit release can be done anytime from the `SqlServerAppLock` class returned from an acquired lock, and is also intrinsically done via IDisposable/IAsyncDisposable on the `SqlServerAppLock` class to provide reliable release when scope closes via C# `using` pattern.
 
 #### Usage Notes: 
- - The generally recommended approach is to use the *Transaction* scope because it is slightly safer (e.g. more resilient agains
+ - The generally recommended approach is to use the *Transaction* scope because it is slightly safer (e.g. more resilient against
 abandoned locks) by allowing the Locks to automatically expire with the Transaction; and is the default behavior of Sql Server.
-    - However the *Session* scope is reliably implemented via IDisposable/IAsyncDisposable C# interfaces leaving 
-the main residual risk of Database communication or Network issues, whereby if we can't communicate with the DB then we can't explicity release the lock.
+   - However the *Session* scope is reliably implemented as long as you always close/dispose of the connection and/or via the `SqlServerAppLock` class; which also implements IDisposable/IAsyncDisposable C# interfaces.
  - The lock _acquisition timeout_ value is the value (in seconds) for which Sql Server will try and wait for Lock Acquisition. By specifying Zero
 (0 seconds) then Sql Server will attempt to get the lock but immediately fail lock acquisition and return if it cannot
 acquire the lock.
@@ -33,10 +34,10 @@ acquire the lock.
 
 #### Use Cases:
  - Provide a lock implementation similar to C# `lock (...) {}` but on a distributed scale across many instances of an 
-application (e.g. Azure Functions, Load Balanced Servers, etc.) .
- - Provide a lock to ensure code is only ever run by one instance at a time (e.g. Bulk Loading or Bulk Synchronization processing, 
+application (e.g. Azure Functions, Load Balanced Servers, etc.).
+ - Provide a mutex lock to ensure code is only ever run by one instance at a time (e.g. Bulk Loading or Bulk Synchronization processing, 
 Queue Processing logic, Transactional Outbox Pattern, etc.).
-- Many more I'm sure... but these are the ones that I've implemented in enterprises.
+- I'm sure there are many more... but these are the best examples that I've needed to implement in enterprises.
 
 
 ## Nuget Package
@@ -62,9 +63,34 @@ using SqlAppLockHelper.SystemDataNS;
 Usage is very simple by using custom extensions of the SqlConnection or SqlTransaction. The following example shows
 the recommended usage of Transaction Scope by calling `.AcquireAppLockAsync(...)` on the SqlTransaction instance:
 
-*NOTE:* Async is recommended, but the sync implementation works exactly the same -- sans async/await.
+*NOTES:* 
+ - Async is recommended, but the sync implementation works exactly the same -- sans async/await.
+ - Default behavior is to throw a `SqlServerAppLockAcquisitionException` when lock acquisition fails but this can be controlled via `throwsException` parameter.
 
-#### Using Sql Transaction (Transaction Scope will be used):
+#### Using Sql Transaction (Transaction Scope will be used) - Default behavior will throw an Exception:
+```csharp
+    //Attempt Acquisition  of Lock and Handle Exception if Lock cannot be acquired...
+    try
+    {
+        await using var sqlConn = new SqlConnection(sqlConnectionString);
+        await sqlConn.OpenAsync();
+        
+        await using var sqlTrans = (SqlTransaction)await sqlConn.BeginTransactionAsync();
+
+        //Using any SqlTransaction (cast DbTransaction to SqlTransaction if needed), this will 
+        //	attempt to acquire a distributed mutex/lock, and will wait up to 5 seconds before timing out.
+        await using var appLock = await sqlTrans.AcquireAppLockAsync("MyAppBulkLoadingDistributedLock", 5);
+
+        //.... Custom logic that should only occur when a lock is held....
+
+    }
+    catch (SqlServerAppLockAcquisitionException appLockException)
+    {
+        //.... A lock could not be acquired so handle as needed....
+    }
+```
+
+#### Using Sql Transaction (Transaction Scope will be used) - Without Exception Handling:
 ```csharp
     await using var sqlConn = new SqlConnection(sqlConnectionString);
     await sqlConn.OpenAsync();
@@ -73,18 +99,17 @@ the recommended usage of Transaction Scope by calling `.AcquireAppLockAsync(...)
 
     //Using any SqlTransaction (cast DbTransaction to SqlTransaction if needed), this will 
     //	attempt to acquire a distributed mutex/lock, and will wait up to 5 seconds before timing out.
-    //Note: Default behavior is to throw and exception if the Lock cannot be acquired
-    //		(e.g. is already held by another process) but this can be overridden by parameter 
-    //		to return the state in the appLock result.
-    await using var appLock = await sqlTrans.AcquireAppLockAsync("MyAppBulkLoadingDistributedLock", 5);
+    //Note: Default behavior is to throw and exception but this is controlled via throwsException param
+    //		and can then be managed via the returned the SqlServerAppLock result.
+    await using var appLock = await sqlTrans.AcquireAppLockAsync("MyAppBulkLoadingDistributedLock", 5, false);
 
     if(appLock.IsAcquired)
     {
-        //.... Custom Lock that should only occur when a lock is held....
+        //.... Custom logic that should only occur when a lock is held....
     }
 
 ```
-#### Using Sql Connection (Session Scope will be used):
+#### Using Sql Connection (Session Scope will be used) - Without Exception Handling:
 _*NOTE: *Application Lock should ALWAYS be explicity Disposed of to ensure Lock is released**_
 ```csharp
     await using var sqlConn = new SqlConnection(sqlConnectionString);
@@ -92,20 +117,19 @@ _*NOTE: *Application Lock should ALWAYS be explicity Disposed of to ensure Lock 
 
     //Using any SqlTransaction (cast DbTransaction to SqlTransaction if needed), this will 
     //	attempt to acquire a distributed mutex/lock, and will wait up to 5 seconds before timing out.
-    //Note: Default behavior is to throw and exception if the Lock cannot be acquired 
-    //		(e.g. is already held by another process) but this can be overridden by parameter 
-    //		to return the state in the appLock result.
+    //Note: Default behavior is to throw and exception but this is controlled via throwsException param
+    //		and can then be managed via the returned the SqlServerAppLock result.
     //Note: The IDisposable/IAsyncDisposable implementation ensures that the Lock is released!
-    await using var appLock = await sqlConn.AcquireAppLockAsync("MyAppBulkLoadingDistributedLock", 5);
+    await using var appLock = await sqlConn.AcquireAppLockAsync("MyAppBulkLoadingDistributedLock", 5, false);
 
     if(appLock.IsAcquired)
     {
-        //.... Custom Lock that should only occur when a lock is held....
+        //.... Custom logic that should only occur when a lock is held....
     }
 
 ```
 
-_**NOTE: More Sample code is provided in the Tests Project (as Integration Tests)...**_
+_**NOTE: More Sample code is provided in the Tests Project...**_
 
 
 ```
