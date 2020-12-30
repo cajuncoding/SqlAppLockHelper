@@ -6,7 +6,7 @@
     <Authors>BBernard / CajunCoding</Authors>
     <Company>CajunCoding</Company>
     <Product>SqlAppLockHelper</Product>
-    <Description>The Common libraries for SqlAppLockHelper; a library for easily using Sql Server built in support for robust distributed mutex / applicaiton locking capabilities. You should install SqlAppLockHelper.SystemData or SqlAppLockHelper.MicrosoftData depending on which SqlClient liberaries are in use in your project.</Description>
+    <Description>The Common libraries for SqlAppLockHelper; a library for easily using Sql Server built in support for robust distributed mutex applicaiton locking capabilities. You should install SqlAppLockHelper.SystemData or SqlAppLockHelper.MicrosoftData depending on which SqlClient liberaries are in use in your project.</Description>
     <Copyright>Copyright © 2020</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/cajuncoding/SqlAppLockHelper</PackageProjectUrl>

@@ -12,7 +12,11 @@
     <PackageProjectUrl>https://github.com/cajuncoding/SqlAppLockHelper</PackageProjectUrl>
     <RepositoryUrl>https://github.com/cajuncoding/SqlAppLockHelper</RepositoryUrl>
     <PackageTags>sp_getapplock, sp_releaseapplock, distributed-locking, distributed-lock-algorithm, app-locking, application-locking, sql, sqlserver, sql-server, sqlclient, locking, application-lock, application-lock-system, transactional-outbox-pattern, azurefunctions, azure-functions, serverless</PackageTags>
-    <PackageReleaseNotes>Initial release of Async/Sync support for System.Data &amp; Microsoft.Data namespace.</PackageReleaseNotes>
+    <PackageReleaseNotes>- Improve stability for Disposing, removing unnecessary exception warnings as locks are released when Connections are disposed/closed. Added explicit Release() &amp; ReleaseAsync() methods, updated tests, and added Timespan for easily tracking lock time.
+
+Prior Release Notes:
+- Initial release of Async/Sync support for System.Data &amp; Microsoft.Data namespace.</PackageReleaseNotes>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
