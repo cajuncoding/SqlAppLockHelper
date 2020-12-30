@@ -15,14 +15,15 @@ The usage for both is identical, with only the import being different based on t
 
 #### Locking Scopes (maps to the `@LockOwner` parameter of `sp_getapplock`):
 There are two scopes for Locks that are supported:
- - Session Scope (requires expclit release; implemented as IDisposable/IAsyncDisposable to provide reliable release via C# `using` pattern)
- - Transaction Scope (can be optionally released, but will automatically be released by SqlServer when Transaction is Commited/Rolled-back/Closed).
+ - Session Scope (will automatically be released by Sql Server when the Sql Connection is disposed/closed; or may be optionally explicitly released).
+ - Transaction Scope (Will automatically be released by Sql Server when Sql Transaction is Commited/Rolled-back/Closed; or can be optionally explicitly released).
+ 
+ Note: Explicit release can be done anytime from the `SqlServerAppLock` class returned from an acquired lock, and is also intrinsically done via IDisposable/IAsyncDisposable on the `SqlServerAppLock` class to provide reliable release when scope closes via C# `using` pattern.
 
 #### Usage Notes: 
- - The generally recommended approach is to use the *Transaction* scope because it is slightly safer (e.g. more resilient agains
+ - The generally recommended approach is to use the *Transaction* scope because it is slightly safer (e.g. more resilient against
 abandoned locks) by allowing the Locks to automatically expire with the Transaction; and is the default behavior of Sql Server.
-    - However the *Session* scope is reliably implemented via IDisposable/IAsyncDisposable C# interfaces leaving 
-the main residual risk of Database communication or Network issues, whereby if we can't communicate with the DB then we can't explicity release the lock.
+   - However the *Session* scope is reliably implemented as long as you always close/dispose of the connection and/or via the `SqlServerAppLock` class; which also implements IDisposable/IAsyncDisposable C# interfaces.
  - The lock _acquisition timeout_ value is the value (in seconds) for which Sql Server will try and wait for Lock Acquisition. By specifying Zero
 (0 seconds) then Sql Server will attempt to get the lock but immediately fail lock acquisition and return if it cannot
 acquire the lock.
@@ -33,10 +34,10 @@ acquire the lock.
 
 #### Use Cases:
  - Provide a lock implementation similar to C# `lock (...) {}` but on a distributed scale across many instances of an 
-application (e.g. Azure Functions, Load Balanced Servers, etc.) .
- - Provide a lock to ensure code is only ever run by one instance at a time (e.g. Bulk Loading or Bulk Synchronization processing, 
+application (e.g. Azure Functions, Load Balanced Servers, etc.).
+ - Provide a mutex lock to ensure code is only ever run by one instance at a time (e.g. Bulk Loading or Bulk Synchronization processing, 
 Queue Processing logic, Transactional Outbox Pattern, etc.).
-- Many more I'm sure... but these are the ones that I've implemented in enterprises.
+- I'm sure there are many more... but these are the best examples that I've needed to implement in enterprises.
 
 
 ## Nuget Package
