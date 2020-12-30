@@ -1,5 +1,5 @@
 ﻿# SqlAppLockHelper -- Easy & Robust Distributed Mutex Application Locking with Sql Server
-An ultra lightweight library that provides and easy to use API for a robust distributed mutex locking capability that leverages 
+An ultra lightweight library that provides an easy to use API for a robust distributed mutex locking capabilities that leverage 
 Sql Server (e.g. sp_getapplock & sp_releaseapplock). Sql Server provides a very robust & efficient distributed mutex/locking
 capability and this library exposes this in an easy to use C# .Net Standard API using custom extension methods
 on the SqlConnection and SqlTransaction classes of the SqlClient libraries.
