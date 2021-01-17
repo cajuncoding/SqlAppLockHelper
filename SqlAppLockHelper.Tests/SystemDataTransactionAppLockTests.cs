@@ -12,7 +12,7 @@ namespace SqlAppLockHelper.Tests
         [TestMethod]
         public async Task TestAsyncTransactionAppLockAcquisitionExceptionsDisabled()
         {
-            await using var sqlConn = TestHelper.CreateSystemDataSqlConnection();
+            await using var sqlConn = SqlConnectionHelper.CreateSystemDataSqlConnection();
             await sqlConn.OpenAsync();
 
             await using var sqlTrans = (SqlTransaction)await sqlConn.BeginTransactionAsync();
@@ -30,7 +30,7 @@ namespace SqlAppLockHelper.Tests
             Assert.IsFalse(string.IsNullOrWhiteSpace(appLock.LockName));
 
             //Attempt Acquisition from SECOND Connection Once Locked & Validate...
-            await using var sqlConnWhileLocked = TestHelper.CreateSystemDataSqlConnection();
+            await using var sqlConnWhileLocked = SqlConnectionHelper.CreateSystemDataSqlConnection();
             await sqlConnWhileLocked.OpenAsync();
 
             await using var sqlTransWhileLocked = (SqlTransaction)await sqlConnWhileLocked.BeginTransactionAsync();
@@ -49,7 +49,7 @@ namespace SqlAppLockHelper.Tests
 
             //Attempt Reacquisition of the Lock Once Released!
             //Get a new Transaction to test re-acquisition!
-            await using var sqlConnAfterRelease = TestHelper.CreateSystemDataSqlConnection();
+            await using var sqlConnAfterRelease = SqlConnectionHelper.CreateSystemDataSqlConnection();
             await sqlConnAfterRelease.OpenAsync();
 
             var sqlTransAfterRelease = (SqlTransaction)await sqlConnAfterRelease.BeginTransactionAsync();
@@ -67,7 +67,7 @@ namespace SqlAppLockHelper.Tests
         [TestMethod]
         public async Task TestAsyncTransactionAppLockAcquisitionWithExceptions()
         {
-            await using var sqlConn = TestHelper.CreateSystemDataSqlConnection();
+            await using var sqlConn = SqlConnectionHelper.CreateSystemDataSqlConnection();
             await sqlConn.OpenAsync();
 
             await using var sqlTrans = (SqlTransaction)await sqlConn.BeginTransactionAsync();
@@ -82,7 +82,7 @@ namespace SqlAppLockHelper.Tests
             //Attempt Acquisition from SECOND Connection Once Locked & Validate...
             try
             {
-                await using var sqlConnWhileLocked = TestHelper.CreateSystemDataSqlConnection();
+                await using var sqlConnWhileLocked = SqlConnectionHelper.CreateSystemDataSqlConnection();
                 await sqlConnWhileLocked.OpenAsync();
 
                 await using var sqlTransWhileLocked = (SqlTransaction)await sqlConnWhileLocked.BeginTransactionAsync();
@@ -104,7 +104,7 @@ namespace SqlAppLockHelper.Tests
         [TestMethod]
         public void TestSyncTransactionAppLockAcquisitionExceptionsDisabled()
         {
-            using var sqlConn = TestHelper.CreateSystemDataSqlConnection();
+            using var sqlConn = SqlConnectionHelper.CreateSystemDataSqlConnection();
             sqlConn.Open();
 
             using var sqlTrans = (SqlTransaction)sqlConn.BeginTransaction();
@@ -117,7 +117,7 @@ namespace SqlAppLockHelper.Tests
             Assert.IsFalse(string.IsNullOrWhiteSpace(appLock.LockName));
 
             //Attempt Acquisition from SECOND Connection Once Locked & Validate...
-            using var sqlConnWhileLocked = TestHelper.CreateSystemDataSqlConnection();
+            using var sqlConnWhileLocked = SqlConnectionHelper.CreateSystemDataSqlConnection();
             sqlConnWhileLocked.Open();
 
             using var sqlTransWhileLocked = (SqlTransaction)sqlConnWhileLocked.BeginTransaction();
@@ -135,7 +135,7 @@ namespace SqlAppLockHelper.Tests
 
             //Attempt Reacquisition of the Lock Once Released!
             //Get a new Transaction to test re-acquisition!
-            using var sqlConnAfterRelease = TestHelper.CreateSystemDataSqlConnection();
+            using var sqlConnAfterRelease = SqlConnectionHelper.CreateSystemDataSqlConnection();
             sqlConnAfterRelease.Open();
 
             var sqlTransAfterRelease = (SqlTransaction)sqlConnAfterRelease.BeginTransaction();
@@ -153,7 +153,7 @@ namespace SqlAppLockHelper.Tests
         [TestMethod]
         public void TestSyncTransactionAppLockAcquisitionWithExceptions()
         {
-            using var sqlConn = TestHelper.CreateSystemDataSqlConnection();
+            using var sqlConn = SqlConnectionHelper.CreateSystemDataSqlConnection();
             sqlConn.Open();
 
             using var sqlTrans = (SqlTransaction)sqlConn.BeginTransaction();
@@ -168,7 +168,7 @@ namespace SqlAppLockHelper.Tests
             //Attempt Acquisition from SECOND Connection Once Locked & Validate...
             try
             {
-                using var sqlConnWhileLocked = TestHelper.CreateSystemDataSqlConnection();
+                using var sqlConnWhileLocked = SqlConnectionHelper.CreateSystemDataSqlConnection();
                 sqlConnWhileLocked.Open();
 
                 using var sqlTransWhileLocked = (SqlTransaction)sqlConnWhileLocked.BeginTransaction();

@@ -12,7 +12,7 @@ namespace SqlAppLockHelper.Tests
         [TestMethod]
         public async Task TestAsyncConnectionAppLockAcquisitionExceptionsDisabled()
         {
-            await using var sqlConn = TestHelper.CreateMicrosoftDataSqlConnection();
+            await using var sqlConn = SqlConnectionHelper.CreateMicrosoftDataSqlConnection();
             await sqlConn.OpenAsync();
 
             //Acquire the Lock & Validate
@@ -27,7 +27,7 @@ namespace SqlAppLockHelper.Tests
             Assert.IsFalse(string.IsNullOrWhiteSpace(appLock.LockName));
 
             ////Attempt Acquisition from SECOND Connection Once Locked & Validate...
-            await using var sqlConnWhileLocked = TestHelper.CreateMicrosoftDataSqlConnection();
+            await using var sqlConnWhileLocked = SqlConnectionHelper.CreateMicrosoftDataSqlConnection();
             await sqlConnWhileLocked.OpenAsync();
 
             await using var appLockFailWhileLocked = await sqlConnWhileLocked.AcquireAppLockAsync(
@@ -49,7 +49,7 @@ namespace SqlAppLockHelper.Tests
 
             //Attempt Reacquisition of the Lock Once Released!
             //Get a new Transaction to test re-acquisition!
-            await using var sqlConnAfterRelease = TestHelper.CreateMicrosoftDataSqlConnection();
+            await using var sqlConnAfterRelease = SqlConnectionHelper.CreateMicrosoftDataSqlConnection();
             await sqlConnAfterRelease.OpenAsync();
 
             await using var appLockAfterRelease = await sqlConnAfterRelease.AcquireAppLockAsync(
@@ -66,7 +66,7 @@ namespace SqlAppLockHelper.Tests
         [TestMethod]
         public async Task TestAsyncConnectionAppLockAcquisitionWithExceptions()
         {
-            await using var sqlConn = TestHelper.CreateMicrosoftDataSqlConnection();
+            await using var sqlConn = SqlConnectionHelper.CreateMicrosoftDataSqlConnection();
             await sqlConn.OpenAsync();
 
             //Acquire the Lock & Validate
@@ -79,7 +79,7 @@ namespace SqlAppLockHelper.Tests
             //Attempt Acquisition from SECOND Connection Once Locked & Validate...
             try
             {
-                await using var sqlConnWhileLocked = TestHelper.CreateMicrosoftDataSqlConnection();
+                await using var sqlConnWhileLocked = SqlConnectionHelper.CreateMicrosoftDataSqlConnection();
                 await sqlConnWhileLocked.OpenAsync();
 
                 await using var appLockFailWhileLocked = await sqlConnWhileLocked.AcquireAppLockAsync(
@@ -100,7 +100,7 @@ namespace SqlAppLockHelper.Tests
         [TestMethod]
         public async Task TestAsyncConnectionAppLockExplicitRelease()
         {
-            await using var sqlConn = TestHelper.CreateMicrosoftDataSqlConnection();
+            await using var sqlConn = SqlConnectionHelper.CreateMicrosoftDataSqlConnection();
             await sqlConn.OpenAsync();
 
             //Acquire the Lock & Validate
@@ -119,7 +119,7 @@ namespace SqlAppLockHelper.Tests
         [TestMethod]
         public async Task TestAsyncConnectionAppLockExplicitReleaseAsync()
         {
-            await using var sqlConn = TestHelper.CreateMicrosoftDataSqlConnection();
+            await using var sqlConn = SqlConnectionHelper.CreateMicrosoftDataSqlConnection();
             await sqlConn.OpenAsync();
 
             //Acquire the Lock & Validate
@@ -132,7 +132,7 @@ namespace SqlAppLockHelper.Tests
             //Explicitly Release the AppLock & Validate
             await appLock.ReleaseAsync();
 
-            await using var sqlConnAfterRelease = TestHelper.CreateMicrosoftDataSqlConnection();
+            await using var sqlConnAfterRelease = SqlConnectionHelper.CreateMicrosoftDataSqlConnection();
             await sqlConnAfterRelease.OpenAsync();
 
             //Acquire the Lock & Validate
@@ -146,7 +146,7 @@ namespace SqlAppLockHelper.Tests
         [TestMethod]
         public void TestAsyncConnectionAppLockExplicitReleaseSync()
         {
-            using var sqlConn = TestHelper.CreateMicrosoftDataSqlConnection();
+            using var sqlConn = SqlConnectionHelper.CreateMicrosoftDataSqlConnection();
             sqlConn.Open();
 
             //Acquire the Lock & Validate
@@ -159,7 +159,7 @@ namespace SqlAppLockHelper.Tests
             //Explicitly Release the AppLock & Validate
             appLock.Release();
 
-            using var sqlConnAfterRelease = TestHelper.CreateMicrosoftDataSqlConnection();
+            using var sqlConnAfterRelease = SqlConnectionHelper.CreateMicrosoftDataSqlConnection();
             sqlConnAfterRelease.Open();
 
             //Acquire the Lock & Validate
@@ -173,7 +173,7 @@ namespace SqlAppLockHelper.Tests
         [TestMethod]
         public async Task TestAsyncConnectionAppLockReleaseWithConnectionDisposalWithUsing()
         {
-            await using (var sqlConn = TestHelper.CreateMicrosoftDataSqlConnection())
+            await using (var sqlConn = SqlConnectionHelper.CreateMicrosoftDataSqlConnection())
             {
                 await sqlConn.OpenAsync();
 
@@ -190,7 +190,7 @@ namespace SqlAppLockHelper.Tests
                 Assert.IsFalse(string.IsNullOrWhiteSpace(appLock.LockName));
 
                 ////Attempt Acquisition from SECOND Connection Once Locked & Validate...
-                await using var sqlConnWhileLocked = TestHelper.CreateMicrosoftDataSqlConnection();
+                await using var sqlConnWhileLocked = SqlConnectionHelper.CreateMicrosoftDataSqlConnection();
                 await sqlConnWhileLocked.OpenAsync();
 
                 await using var appLockFailWhileLocked = await sqlConnWhileLocked.AcquireAppLockAsync(
@@ -207,7 +207,7 @@ namespace SqlAppLockHelper.Tests
 
             //Attempt Reacquisition of the Lock Once Released via Sql Connection Disposal (from using{} scope) above!
             //Get a new Transaction to test re-acquisition!
-            await using var sqlConnAfterRelease = TestHelper.CreateMicrosoftDataSqlConnection();
+            await using var sqlConnAfterRelease = SqlConnectionHelper.CreateMicrosoftDataSqlConnection();
             await sqlConnAfterRelease.OpenAsync();
 
             await using var appLockAfterRelease = await sqlConnAfterRelease.AcquireAppLockAsync(

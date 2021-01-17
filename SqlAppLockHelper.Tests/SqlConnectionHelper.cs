@@ -6,7 +6,7 @@ using MicrosoftData = Microsoft.Data.SqlClient;
 
 namespace SqlAppLockHelper.Tests
 {
-    public class TestHelper
+    public class SqlConnectionHelper
     {
         public static SystemData.SqlConnection CreateSystemDataSqlConnection()
         {
