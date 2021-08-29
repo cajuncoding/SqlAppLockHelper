@@ -4,6 +4,11 @@ Sql Server (e.g. sp_getapplock & sp_releaseapplock). Sql Server provides a very 
 capability and this library exposes this in an easy to use C# .Net Standard API using custom extension methods
 on the SqlConnection and SqlTransaction classes of the SqlClient libraries.
 
+### Nuget Package
+To use in your project, add the appropriate package to your project for the namespace you are using:
+-  [SqlAppLockHelper.MicrosoftData NuGet package](https://www.nuget.org/packages/SqlAppLockHelper.MicrosoftData/)
+-  [SqlAppLockHelper.SystemData NuGet package](https://www.nuget.org/packages/SqlAppLockHelper.SystemData/)
+
 ### [Buy me a Coffee ☕](https://www.buymeacoffee.com/cajuncoding)
 *I'm happy to share with the community, but if you find this useful (e.g for professional use), and are so inclinded,
 then I do love-me-some-coffee!*
@@ -12,8 +17,9 @@ then I do love-me-some-coffee!*
 <img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174">
 </a> 
 
-#### SqlClient Namespaces:
-There are two namespaces for SqlClient, and this library supports both:
+## Sql Server Details:
+#### Both SqlClient Namespaces are Supported:
+The library supports both SqlClient libraries:
  - System.Data.SqlClient (Legacy; long term supported for existing applications)
  - Microsoft.Data.SqlClient (Future; recommended go-forward library for new applications)
 
@@ -21,14 +27,14 @@ The usage for both is identical, with only the import being different based on t
  - `using SqlAppLockHelper.SystemDataNS;`
  - `using SqlAppLockHelper.MicrosoftDataNS;`
 
-#### Locking Scopes (maps to the `@LockOwner` parameter of `sp_getapplock`):
+#### Both Transaction & Connection Locking Scopes are supported:
 There are two scopes for Locks that are supported:
- - Session Scope (will automatically be released by Sql Server when the Sql Connection is disposed/closed; or may be optionally explicitly released).
- - Transaction Scope (Will automatically be released by Sql Server when Sql Transaction is Commited/Rolled-back/Closed; or can be optionally explicitly released).
- 
- Note: Explicit release can be done anytime from the `SqlServerAppLock` class returned from an acquired lock, and is also intrinsically done via IDisposable/IAsyncDisposable on the `SqlServerAppLock` class to provide reliable release when scope closes via C# `using` pattern.
+ - **Session Scope** (aka Connection) - will automatically be released by Sql Server when the Sql Connection is disposed/closed; or may be optionally explicitly released.
+ - **Transaction Scope** - Will automatically be released by Sql Server when Sql Transaction is Commited/Rolled-back/Closed; or can be optionally explicitly released.
 
-#### Usage Notes: 
+_NOTE: These scopes map to the underlying maps to the `@LockOwner` parameter of `sp_getapplock`_)
+
+### Usage Notes: 
  - The generally recommended approach is to use the *Transaction* scope because it is slightly safer (e.g. more resilient against
 abandoned locks) by allowing the Locks to automatically expire with the Transaction; and is the default behavior of Sql Server.
    - However the *Session* scope is reliably implemented as long as you always close/dispose of the connection and/or via the `SqlServerAppLock` class; which also implements IDisposable/IAsyncDisposable C# interfaces.
@@ -40,20 +46,17 @@ acquire the lock.
    - [sp_getapplock](https://docs.microsoft.com/en-us/sql/relational-databases/system-stored-procedures/sp-getapplock-transact-sql?view=sql-server-ver15)
    - [sp_releaseapplock](https://docs.microsoft.com/en-us/sql/relational-databases/system-stored-procedures/sp-releaseapplock-transact-sql?view=sql-server-ver15) 
 
-#### Use Cases:
+### Releasing Locks with IDisposable/IAsyncDisposable Patterns:
+Explicit release can be done anytime from the `SqlServerAppLock` class returned from an acquired lock, and is also intrinsically done via IDisposable/IAsyncDisposable on the `SqlServerAppLock` class to provide reliable release when scope closes via C# `using` pattern.
+
+### Use Cases:
  - Provide a lock implementation similar to C# `lock (...) {}` but on a distributed scale across many instances of an 
 application (e.g. Azure Functions, Load Balanced Servers, etc.).
  - Provide a mutex lock to ensure code is only ever run by one instance at a time (e.g. Bulk Loading or Bulk Synchronization processing, 
 Queue Processing logic, Transactional Outbox Pattern, etc.).
 - I'm sure there are many more... but these are the best examples that I've needed to implement in enterprises.
 
-
-## Nuget Package
-To use in your project, add the appropriate package to your project for the namespace you are using:
--  [SqlAppLockHelper.MicrosoftData NuGet package](https://www.nuget.org/packages/SqlAppLockHelper.MicrosoftData/)
--  [SqlAppLockHelper.SystemData NuGet package](https://www.nuget.org/packages/SqlAppLockHelper.SystemData/)
-
-## Usage:
+## Code Samples/Snippets:
 
 #### Import the Custom Extensions:
 First import the extensions for the library you are using:
