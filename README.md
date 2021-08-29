@@ -4,6 +4,14 @@ Sql Server (e.g. sp_getapplock & sp_releaseapplock). Sql Server provides a very 
 capability and this library exposes this in an easy to use C# .Net Standard API using custom extension methods
 on the SqlConnection and SqlTransaction classes of the SqlClient libraries.
 
+### [Buy me a Coffee ☕](https://www.buymeacoffee.com/cajuncoding)
+*I'm happy to share with the community, but if you find this useful (e.g for professional use), and are so inclinded,
+then I do love-me-some-coffee!*
+
+<a href="https://www.buymeacoffee.com/cajuncoding" target="_blank">
+<img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174">
+</a> 
+
 #### SqlClient Namespaces:
 There are two namespaces for SqlClient, and this library supports both:
  - System.Data.SqlClient (Legacy; long term supported for existing applications)
