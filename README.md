@@ -1,4 +1,4 @@
-﻿# SqlAppLockHelper -- Easy & Robust Distributed Mutex Application Locking with Sql Server
+# SqlAppLockHelper -- Easy & Robust Distributed Mutex Application Locking with Sql Server
 An ultra lightweight library that provides an easy to use API for a robust distributed mutex locking capabilities that leverage 
 Sql Server (e.g. sp_getapplock & sp_releaseapplock). Sql Server provides a very robust & efficient distributed mutex/locking
 capability and this library exposes this in an easy to use C# .Net Standard API using custom extension methods
@@ -17,8 +17,8 @@ then I do love-me-some-coffee!*
 <img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174">
 </a> 
 
-## Sql Server Details:
-#### Both SqlClient Namespaces are Supported:
+## Usage:
+#### Both SqlClient Namespaces are Supported for Sql Server:
 The library supports both SqlClient libraries:
  - System.Data.SqlClient (Legacy; long term supported for existing applications)
  - Microsoft.Data.SqlClient (Future; recommended go-forward library for new applications)
@@ -34,7 +34,7 @@ There are two scopes for Locks that are supported:
 
 _NOTE: These scopes map to the underlying maps to the `@LockOwner` parameter of `sp_getapplock`_)
 
-### Usage Notes: 
+### Genral Usage Notes: 
  - The generally recommended approach is to use the *Transaction* scope because it is slightly safer (e.g. more resilient against
 abandoned locks) by allowing the Locks to automatically expire with the Transaction; and is the default behavior of Sql Server.
    - However the *Session* scope is reliably implemented as long as you always close/dispose of the connection and/or via the `SqlServerAppLock` class; which also implements IDisposable/IAsyncDisposable C# interfaces.
