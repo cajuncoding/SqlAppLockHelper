@@ -11,7 +11,7 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/cajuncoding/SqlAppLockHelper</PackageProjectUrl>
     <RepositoryUrl>https://github.com/cajuncoding/SqlAppLockHelper</RepositoryUrl>
-    <PackageTags>sp_getapplock, sp_releaseapplock, distributed-locking, distributed-lock-algorithm, app-locking, application-locking, sql, sqlserver, sql-server, sqlclient, locking, application-lock, application-lock-system, transactional-outbox-pattern, azurefunctions, azure-functions, serverless</PackageTags>
+    <PackageTags>sp_getapplock, sp_releaseapplock, distributed-locking, distributed-lock-algorithm, mutex, locking, distributed mutex, distributed-mutex, app-locking, application-locking, sql, sqlserver, sql-server, sqlclient, locking, application-lock, application-lock-system, transactional-outbox-pattern, azurefunctions, azure-functions, serverless</PackageTags>
     <PackageReleaseNotes>- Improve stability for Disposing, removing unnecessary exception warnings as locks are released when Connections are disposed/closed. Added explicit Release() &amp; ReleaseAsync() methods, updated tests, and added Timespan for easily tracking lock time.
 
 Prior Release Notes:
