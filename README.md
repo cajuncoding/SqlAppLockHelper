@@ -122,12 +122,20 @@ the recommended usage of Transaction Scope by calling `.AcquireAppLockAsync(...)
 ```
 #### Using Sql Connection (Session Scope will be used) - Without Exception Handling:
 _*NOTE: *Application Lock should ALWAYS be explicity Disposed of to ensure Lock is released**_
+As a Connection level lock this will use the Sql Server Session level scoping which has it's own set of pros/cons and 
+potentially some additional risks of orphaned locks in the event of a thread crasching and not disposing correctly or 
+returning to the connection pool for the Session to end.
+
+For more info see the [Microsoft Docs here](https://learn.microsoft.com/en-us/sql/relational-databases/system-stored-procedures/sp-getapplock-transact-sql?view=sql-server-ver16#remarks):
+https://learn.microsoft.com/en-us/sql/relational-databases/system-stored-procedures/sp-getapplock-transact-sql?view=sql-server-ver16#remarks
+
 ```csharp
     await using var sqlConn = new SqlConnection(sqlConnectionString);
     await sqlConn.OpenAsync();
 
-    //Using any SqlTransaction (cast DbTransaction to SqlTransaction if needed), this will 
-    //	attempt to acquire a distributed mutex/lock, and will wait up to 5 seconds before timing out.
+    //Using any SqlConnection (cast DbConnection to SqlConnection if needed), this will 
+    //	attempt to acquire a distributed mutex/lock at the connection level, and will wait
+    // up to 5 seconds before timing out (as specified).
     //Note: Default behavior is to throw and exception but this is controlled via throwsException param
     //		and can then be managed via the returned the SqlServerAppLock result.
     //Note: The IDisposable/IAsyncDisposable implementation ensures that the Lock is released!
