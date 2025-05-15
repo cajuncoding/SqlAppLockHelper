@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Concurrent;
+using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Data.SqlClient;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SqlAppLockHelper.MicrosoftDataNS;
 
@@ -9,6 +11,63 @@ namespace SqlAppLockHelper.Tests
     [TestClass]
     public class TestMicrosoftDataAppLock
     {
+        public TestContext TestContext { get; set; }
+
+        [TestMethod]
+        public async Task TestAsyncConnectionAppLockWaitInLineBlockingSupport()
+        {
+            const int waitSeconds = 60;
+            const int workTimeSeconds = 2;
+
+            async Task<WorkerResult> WorkerFuncAsync(int id)
+            {
+                TestContext.WriteLine($"Working ID [{id}] Waiting for Lock for up to [{waitSeconds}s]...");
+                ////Attempt Lock Acquisition...
+                await using var sqlConn = SqlConnectionHelper.CreateMicrosoftDataSqlConnection();
+                await sqlConn.OpenAsync();
+
+                await using var appLock = await sqlConn.AcquireAppLockAsync(
+                    nameof(TestSystemDataAppLock),
+                    acquisitionTimeoutSeconds: waitSeconds,
+                    throwsException: false
+                );
+
+                var waitTime = appLock.LockAcquisitionWaitTime;
+                if (appLock.IsLockAcquired)
+                {
+                    TestContext.WriteLine($"Working ID [{id}] Successfully Acquired the Lock [{appLock.LockAcquisitionResult}] after waiting [{waitTime.TotalSeconds}s]...");
+                    //Do Some Work for a couple seconds to distribute the wait times!
+                    await Task.Delay(TimeSpan.FromSeconds(workTimeSeconds)).ConfigureAwait(false);
+                }
+                else
+                {
+                    TestContext.WriteLine($"Working ID [{id}] Failed to Acquire the Lock [{appLock.LockAcquisitionResult}] after waiting [{waitTime.TotalSeconds}s]...");
+                }
+
+                return new WorkerResult(id, appLock);
+            }
+
+            var workerResults = new ConcurrentBag<WorkerResult>();
+            await Parallel.ForEachAsync(Enumerable.Range(0, 10), async (i, cancellationToken) =>
+            {
+                workerResults.Add(await WorkerFuncAsync(i).ConfigureAwait(false));
+            }).ConfigureAwait(false);
+
+            foreach (var workerResult in workerResults.OrderBy(wr => wr.AppLock.LockElapsedTime))
+            {
+                Assert.IsNotNull(workerResult);
+                Assert.IsNotNull(workerResult.AppLock);
+                Assert.IsTrue(workerResult.AppLock.IsLockAcquired);
+                Assert.IsTrue(workerResult.AppLock.LockAcquisitionWaitTime.TotalMilliseconds > 0);
+            }
+            
+            //Every Lock should have waiting a different/unique number of Seconds!
+            Assert.AreEqual(
+                workerResults.Count,
+                workerResults.Select(r => (int)Math.Round(r.AppLock.LockAcquisitionWaitTime.TotalSeconds)).Distinct().Count()
+            );
+        }
+
         [TestMethod]
         public async Task TestAsyncConnectionAppLockAcquisitionExceptionsDisabled()
         {

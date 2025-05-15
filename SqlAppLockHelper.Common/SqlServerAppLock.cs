@@ -12,7 +12,7 @@ namespace SqlAppLockHelper
         //      namespaces, reducing duplication.
         private Func<ValueTask> _releaseActionAsync = null;
         private Action _releaseAction = null;
-        private Stopwatch _lockTimer = new Stopwatch();
+        private readonly Stopwatch _lockTimer = new Stopwatch();
 
         public string LockName { get; }
 
@@ -20,6 +20,7 @@ namespace SqlAppLockHelper
 
         public SqlServerAppLockAcquisitionResult LockAcquisitionResult { get; }
 
+        public TimeSpan LockAcquisitionWaitTime { get; }
         public TimeSpan LockElapsedTime => _lockTimer.Elapsed;
 
         public SqlServerAppLock(
@@ -27,17 +28,19 @@ namespace SqlAppLockHelper
             SqlServerAppLockScope scope, 
             SqlServerAppLockAcquisitionResult lockAcquisitionResult,
             Action releaseAction,
-            Func<ValueTask> releaseActionAsync)
-        {
+            Func<ValueTask> releaseActionAsync,
+            TimeSpan lockAcquisitionWaitTime
+        ) {
             if(string.IsNullOrWhiteSpace(lockName)) 
                 throw new ArgumentNullException(nameof(lockName));
 
             LockName = lockName;
             LockScope = scope;
             LockAcquisitionResult = lockAcquisitionResult;
+            LockAcquisitionWaitTime = lockAcquisitionWaitTime;
 
             //Start the Lock Timer ONLY if Lock was Acquired!
-            if(this.IsLockAcquired)
+            if (this.IsLockAcquired)
                 _lockTimer.Start();
 
             //Initialize Sync & Async callbacks for Disposal!
@@ -49,8 +52,9 @@ namespace SqlAppLockHelper
 
         public bool IsDisposed { get; protected set; }
 
-        public bool IsLockAcquired => LockAcquisitionResult == SqlServerAppLockAcquisitionResult.AcquiredImmediately
-                                  || LockAcquisitionResult == SqlServerAppLockAcquisitionResult.AcquiredAfterRelease;
+        public bool IsLockAcquired => 
+            LockAcquisitionResult == SqlServerAppLockAcquisitionResult.AcquiredImmediately
+            || LockAcquisitionResult == SqlServerAppLockAcquisitionResult.AcquiredAfterRelease;
 
         /// <summary>
         /// Explicitly release the Lock on demand asynchronously; also called when disposed asynchronously.

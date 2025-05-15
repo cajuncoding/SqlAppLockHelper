@@ -1,34 +1,39 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
-    <PackageId>SqlAppLockHelper.MicrosoftData</PackageId>
-    <Authors>BBernard / CajunCoding</Authors>
-    <Company>CajunCoding</Company>
-    <Product>SqlAppLockHelper</Product>
-    <Description>An ultra lightweight API for robust distributed application mutex locking capabilities leveraging Sql Server.  The API provides a set of easy to use custom extensions for the Microsoft.Data.SqlClient library that provide robust distributed application mutex/locking support via the sp_getapplock &amp; sp_releaseapplock stored procedures.</Description>
-    <Copyright>Copyright © 2020</Copyright>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/cajuncoding/SqlAppLockHelper</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/cajuncoding/SqlAppLockHelper</RepositoryUrl>
-    <PackageTags>sp_getapplock, sp_releaseapplock, distributed-locking, distributed-lock-algorithm, mutex, locking, distributed mutex, distributed-mutex, app-locking, application-locking, sql, sqlserver, sql-server, sqlclient, locking, application-lock, application-lock-system, transactional-outbox-pattern, azurefunctions, azure-functions, serverless</PackageTags>
-    <PackageReleaseNotes>- Improve stability for Disposing, removing unnecessary exception warnings as locks are released when Connections are disposed/closed. Added explicit Release() &amp; ReleaseAsync() methods, updated tests, and added Timespan for easily tracking lock time.
+	<PropertyGroup>
+		<TargetFramework>netstandard2.1</TargetFramework>
+		<PackageId>SqlAppLockHelper.MicrosoftData</PackageId>
+		<Version>1.0.2</Version>
+		<Authors>BBernard / CajunCoding</Authors>
+		<Company>CajunCoding</Company>
+		<Product>SqlAppLockHelper</Product>
+		<Description>An ultra lightweight API for robust distributed application mutex locking capabilities leveraging Sql Server.  The API provides a set of easy to use custom extensions for the Microsoft.Data.SqlClient library that provide robust distributed application mutex/locking support via the sp_getapplock &amp; sp_releaseapplock stored procedures.</Description>
+		<Copyright>Copyright © 2020</Copyright>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageProjectUrl>https://github.com/cajuncoding/SqlAppLockHelper</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/cajuncoding/SqlAppLockHelper</RepositoryUrl>
+		<PackageTags>sp_getapplock, sp_releaseapplock, distributed-locking, distributed-lock-algorithm, mutex, locking, distributed mutex, distributed-mutex, app-locking, application-locking, sql, sqlserver, sql-server, sqlclient, locking, application-lock, application-lock-system, transactional-outbox-pattern, azurefunctions, azure-functions, serverless</PackageTags>
+		<PackageReleaseNotes>
+			- Added automatic tracking of Lock Acquisition Wait time in addition to the actual Lock hold elapsed time so it's easy to now see how long the process actually waited in line to get the lock.
+			- Enhnace to automatically apply Lock Acquisition Wait time to Sql Command Timeout (if not explicitly set).
+			- This helps simplify and reduce risk of incorrect use with Sql Command timeout failing before Lock Wait period is over.
 
-Prior Release Notes:
-- Initial release of Async/Sync support for System.Data &amp; Microsoft.Data namespace.</PackageReleaseNotes>
-    <Version>1.0.1</Version>
-  </PropertyGroup>
+			Prior Release Notes:
+			- Improve stability for Disposing, removing unnecessary exception warnings as locks are released when Connections are disposed/closed. Added explicit Release() &amp; ReleaseAsync() methods, updated tests, and added Timespan for easily tracking lock time.
+			- Initial release of Async/Sync support for System.Data &amp; Microsoft.Data namespace.
+		</PackageReleaseNotes>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <None Include="..\README.md" Link="README.md" />
-  </ItemGroup>
+	<ItemGroup>
+		<None Include="..\README.md" Link="README.md" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="2.1.1" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Data.SqlClient" Version="2.1.1" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\SqlAppLockHelper.Common\SqlAppLockHelper.Common.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\SqlAppLockHelper.Common\SqlAppLockHelper.Common.csproj" />
+	</ItemGroup>
 
 </Project>

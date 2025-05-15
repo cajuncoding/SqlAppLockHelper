@@ -32,11 +32,13 @@ namespace SqlAppLockHelper.MicrosoftDataNS
             SqlAppLockValidation.AssertParamsAreValid(lockName, acquisitionTimeoutSeconds);
 
             //Sql Server uses Milliseconds, but we use Seconds to simplify the C# Api.
-            var acquisitionTimeoutMillis = acquisitionTimeoutSeconds * 1000;
+            var lockWaitTimeSpan = acquisitionTimeoutSeconds > 0 
+                ? TimeSpan.FromSeconds(acquisitionTimeoutSeconds)
+                : TimeSpan.Zero;
 
-            var lockScopeText = lockScope == SqlServerAppLockScope.Transaction
-                                        ? SqlServerLockScopeNames.Transaction
-                                        : SqlServerLockScopeNames.Session;
+            var lockScopeText = lockScope is SqlServerAppLockScope.Transaction
+                ? SqlServerLockScopeNames.Transaction
+                : SqlServerLockScopeNames.Session;
 
             var sqlCmd = new SqlCommand(SqlServerStoredProcNames.AcquireLock, sqlConn)
             {
@@ -48,11 +50,15 @@ namespace SqlAppLockHelper.MicrosoftDataNS
             {
                 sqlCmd.CommandTimeout = sqlCommandTimeout.Value;
             }
+            else if (lockWaitTimeSpan > TimeSpan.Zero)
+            {
+                sqlCmd.CommandTimeout = (int)lockWaitTimeSpan.TotalSeconds + 1;
+            }
 
             sqlCmd.Parameters.AddRange(new[]
             {
                 CreateSqlParam(SqlServerStoredParamNames.Resource, lockName),
-                CreateSqlParam(SqlServerStoredParamNames.LockTimeout, acquisitionTimeoutMillis),
+                CreateSqlParam(SqlServerStoredParamNames.LockTimeout, (int)lockWaitTimeSpan.TotalMilliseconds),
                 CreateSqlParam(SqlServerStoredParamNames.LockOwner, lockScopeText),
                 CreateSqlParam(SqlServerStoredParamNames.LockMode, SqlServerLockModeNames.Exclusive),
                 CreateSqlReturnParam(SqlServerStoredParamNames.ReturnValue)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace SqlAppLockHelper.SystemDataNS
@@ -86,7 +87,9 @@ namespace SqlAppLockHelper.SystemDataNS
             );
 
             //Execute the Acquisition process...
+            var acquisitionWaitTimer = Stopwatch.StartNew();
             sqlCmd.ExecuteNonQuery();
+            acquisitionWaitTimer.Stop();
 
             //Get & Validate the Return Value!
             var acquisitionResult = sqlCmd.GetLockAcquisitionResultValue();
@@ -99,7 +102,8 @@ namespace SqlAppLockHelper.SystemDataNS
                 lockScope,
                 acquisitionResult,
                 releaseAction: SqlAppLockCommandBuilder.CreateReleaseLockDelegate(sqlConn, lockName, lockScope),
-                releaseActionAsync: SqlAppLockCommandBuilder.CreateReleaseLockAsyncDelegate(sqlConn, lockName, lockScope)
+                releaseActionAsync: SqlAppLockCommandBuilder.CreateReleaseLockAsyncDelegate(sqlConn, lockName, lockScope),
+                acquisitionWaitTimer.Elapsed
             );
 
             return resultAppLock;
@@ -129,9 +133,11 @@ namespace SqlAppLockHelper.SystemDataNS
                 sqlCommandTimeout,
                 sqlTransaction
             );
-            
+
             //Execute the Acquisition process...
+            var acquisitionWaitTimer = Stopwatch.StartNew();
             await sqlCmd.ExecuteNonQueryAsync();
+            acquisitionWaitTimer.Stop();
 
             //Get & Validate the Return Value!
             var acquisitionResult = sqlCmd.GetLockAcquisitionResultValue();
@@ -144,7 +150,8 @@ namespace SqlAppLockHelper.SystemDataNS
                 lockScope,
                 acquisitionResult,
                 releaseAction: SqlAppLockCommandBuilder.CreateReleaseLockDelegate(sqlConn, lockName, lockScope),
-                releaseActionAsync: SqlAppLockCommandBuilder.CreateReleaseLockAsyncDelegate(sqlConn, lockName, lockScope)
+                releaseActionAsync: SqlAppLockCommandBuilder.CreateReleaseLockAsyncDelegate(sqlConn, lockName, lockScope),
+                acquisitionWaitTimer.Elapsed
             );
 
             return resultAppLock;
