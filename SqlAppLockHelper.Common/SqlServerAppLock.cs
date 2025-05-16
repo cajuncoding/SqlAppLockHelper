@@ -1,12 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace SqlAppLockHelper
 {
+    #pragma warning disable S3881
     public class SqlServerAppLock : IDisposable, IAsyncDisposable
+    #pragma warning restore S3881
     {
         //NOTE: Using Delegates here allows this class to be independent of Microsoft.Data/System.Data
         //      namespaces, reducing duplication.
