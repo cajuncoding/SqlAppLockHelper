@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<TargetFramework>netstandard2.1</TargetFramework>
 		<PackageId>SqlAppLockHelper.Common</PackageId>
-		<Version>1.0.2</Version>
+		<Version>1.0.3</Version>
 		<Authors>BBernard / CajunCoding</Authors>
 		<Company>CajunCoding</Company>
 		<Product>SqlAppLockHelper</Product>
